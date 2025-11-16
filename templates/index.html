@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Product Recommender — Vengro</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /*
+      60/30/10 color rule:
+      - Dominant 60% (background / large surfaces): --bg-dominant
+      - Secondary 30% (surfaces / cards / strong text): --secondary
+      - Accent 10% (buttons / highlights): --accent
+    */
+    :root{
+      --bg-dominant: #F4F6F9;     /* ~60% dominant surface - light neutral */
+      --secondary:   #0B2545;     /* ~30% secondary - deep navy/charcoal */
+      --accent:      #00D1FF;     /* ~10% accent - vibrant cyan */
+      --muted:       #5C6B7A;
+      --card:        #FFFFFF;
+      --radius:      12px;
+      --shadow:      0 12px 30px rgba(11,37,69,0.06);
+      --glass:       rgba(255,255,255,0.75);
+    }
+
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Arial;color:#071029;background:linear-gradient(180deg,var(--bg-dominant),#eef3fa);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+
+    .wrap{max-width:1200px;margin:28px auto;padding:18px;}
+
+    /* Header */
+    header.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:20px}
+    .brand{display:flex;gap:14px;align-items:center}
+    .logo{
+      width:64px;height:64px;border-radius:14px;
+      background:linear-gradient(135deg,var(--secondary),#18345b);
+      color:white;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:var(--shadow);
+    }
+    .title h1{margin:0;font-size:20px;color:var(--secondary)}
+    .title p{margin:4px 0 0;color:var(--muted);font-size:13px}
+
+    /* Controls */
+    .controls{display:flex;gap:12px;align-items:center;background:var(--card);padding:12px;border-radius:12px;box-shadow:var(--shadow)}
+    input[type="text"],select{
+      padding:12px 14px;border-radius:10px;border:1px solid #e9f0f7;font-size:15px;outline:none;min-width:220px;background:#fff
+    }
+    button.primary{
+      background:linear-gradient(90deg,var(--accent),#00b0e6);border:none;color:#042033;padding:10px 16px;border-radius:10px;font-weight:700;cursor:pointer;box-shadow:0 8px 20px rgba(0,209,255,0.12)
+    }
+    button.ghost{background:transparent;border:1px solid #e6eef7;padding:9px 12px;border-radius:10px;cursor:pointer}
+
+    /* Layout */
+    .layout{display:grid;grid-template-columns:1fr 360px;gap:22px;margin-top:18px}
+    .panel{background:var(--card);border-radius:12px;padding:20px;box-shadow:var(--shadow);min-height:420px}
+    .sidebar .card{background:linear-gradient(180deg,#ffffff,#fbfdff);border-radius:12px;padding:16px;box-shadow:var(--shadow)}
+
+    /* Panel header */
+    .panel .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+    .panel h2{margin:0;font-size:18px}
+    .panel .meta{color:var(--muted);font-size:13px}
+
+    /* Recommendation cards */
+    .rec-list{display:grid;gap:14px}
+    .rec-card{display:flex;gap:12px;padding:16px;border-radius:12px;border:1px solid rgba(11,37,69,0.03);background:linear-gradient(180deg,#fff,#fbfdff)}
+    .rec-index{width:52px;height:52px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#f3fbff,#eefcff);color:var(--secondary);font-weight:800}
+    .rec-body{flex:1}
+    .rec-title{margin:0;font-weight:700;color:var(--secondary);text-transform:uppercase}
+    .rec-sub{color:var(--muted);font-size:13px;display:flex;gap:10px;align-items:center;margin-top:6px}
+    .score{margin-left:auto;color:var(--muted);font-size:13px}
+
+    .rec-actions{margin-top:12px;display:flex;gap:8px}
+    .btn-small{padding:8px 12px;border-radius:8px;border:1px solid rgba(11,37,69,0.04);background:#fff;cursor:pointer;font-weight:600}
+
+    .explain{margin-top:12px;padding:14px;border-radius:10px;border:1px solid rgba(11,37,69,0.04);background:#fbfdff;color:#0b1a29;line-height:1.5}
+
+    /* Sidebar purchase history */
+    .history-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+    .history-title{font-size:15px;color:var(--secondary);margin:0}
+    .country{color:var(--muted);font-size:13px}
+
+    .hist-grid{display:grid;gap:10px}
+    .hist-row{display:grid;grid-template-columns:1fr 72px;gap:12px;align-items:center}
+    .hist-name{background:#fff;padding:10px;border-radius:10px;border:1px solid rgba(11,37,69,0.03);font-weight:600;color:#0b1a29}
+    .qty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px;border-radius:8px;background:linear-gradient(180deg,#f7fffe,#eefefc);border:1px solid rgba(0,209,255,0.08);min-width:62px;text-align:center}
+    .qty .label{font-size:11px;color:var(--muted);margin-bottom:4px}
+    .qty .num{font-weight:700;color:var(--secondary)}
+
+    /* Footer */
+    footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
+
+    /* Responsive */
+    @media (max-width:980px){
+      .layout{grid-template-columns:1fr}
+      .controls{flex-direction:column;align-items:stretch}
+      input[type="text"],select{width:100%}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">VG</div>
+        <div class="title">
+          <h1>Vengro Product Recommender</h1>
+          <p>Hybrid recommendations • LLM explainability</p>
+        </div>
+      </div>
+
+      <div class="controls" role="region" aria-label="Controls">
+        <input id="customer_id" type="text" placeholder="Customer ID (e.g. 13047)" aria-label="Customer ID" />
+        <select id="rec_type" aria-label="Recommendation type">
+          <option value="hybrid">Hybrid (CF + Apriori)</option>
+          <option value="item_cf">Item-based CF</option>
+          <option value="apriori">Apriori (Also Bought)</option>
+          <option value="popular">Top Popular</option>
+        </select>
+        <button id="generateBtn" class="primary">Generate</button>
+        <button id="clearBtn" class="ghost">Clear</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <!-- Left: Recommendations -->
+      <section class="panel" aria-labelledby="rec_title">
+        <div class="head">
+          <div>
+            <div class="meta">Recommendations</div>
+            <h2 id="rec_title">Top product suggestions</h2>
+          </div>
+          <div class="meta" id="customer_meta">Enter customer ID to begin</div>
+        </div>
+
+        <div id="rec_container">
+          <div style="padding:18px;border-radius:10px;border:1px dashed rgba(11,37,69,0.03);background:linear-gradient(0deg,#fff,#fbfdff);">
+            <div class="meta">No recommendations yet</div>
+            <div style="margin-top:10px;color:var(--muted)">Enter a Customer ID and click Generate to see personalized suggestions and 2–3 sentence explanations.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: Sidebar -->
+      <aside class="sidebar">
+        <div class="card">
+          <div class="history-head">
+            <div>
+              <div class="meta">Customer</div>
+              <h3 class="history-title" id="customer_title">Purchase History</h3>
+            </div>
+            <div class="country" id="customer_country"></div>
+          </div>
+
+          <div style="margin-bottom:8px;color:var(--muted);display:flex;justify-content:space-between;font-weight:600">
+            <div>Product</div>
+            <div style="text-align:center">Quantity</div>
+          </div>
+
+          <div class="hist-grid" id="history_list">
+            <div class="hist-row">
+              <div class="hist-name" style="color:var(--muted)">No history yet</div>
+              <div class="qty">
+                <div class="label">Quantity</div>
+                <div class="num">-</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center"><div class="meta">Settings</div><div style="color:var(--muted);font-size:13px">Show explanations</div></div>
+          <div style="margin-top:10px;display:flex;align-items:center;gap:10px">
+            <input id="showExplain" type="checkbox" checked />
+            <div style="font-size:13px;color:var(--muted)">Toggle LLM explanations</div>
+          </div>
+
+          <div style="margin-top:12px;color:var(--muted);font-size:13px">
+            <strong>Tips</strong>
+            <ul style="margin:8px 0 0 18px">
+              <li>Use a valid customer ID from your dataset.</li>
+              <li>Hybrid gives balanced results for most users.</li>
+              <li>Explanations require the server's OPENROUTER_API_KEY.</li>
+            </ul>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <footer>
+      <div style="margin-bottom:6px;color:var(--muted)">© Vengro — Product Recommender</div>
+      <div style="font-weight:700;color:var(--secondary)">Vengro Copyright 2025 Reserved</div>
+    </footer>
+  </div>
+
+  <script>
+    // UI references (keeps same API contract as your backend)
+    const generateBtn = document.getElementById('generateBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const recContainer = document.getElementById('rec_container');
+    const historyList = document.getElementById('history_list');
+    const customerMeta = document.getElementById('customer_meta');
+    const customerTitle = document.getElementById('customer_title');
+    const customerCountry = document.getElementById('customer_country');
+    const showExplain = document.getElementById('showExplain');
+
+    function el(tag, cls, html){
+      const e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (html !== undefined) e.innerHTML = html;
+      return e;
+    }
+
+    function showLoading(){
+      recContainer.innerHTML = '';
+      for (let i=0;i<4;i++){
+        const card = el('div','rec-card','');
+        card.innerHTML = `<div class="rec-index">${i+1}</div><div class="rec-body"><div style="width:50%;height:14px;background:linear-gradient(90deg,#eef6fb,#f7fbff);border-radius:6px"></div><div style="height:10px;margin-top:8px;background:linear-gradient(90deg,#eef6fb,#f7fbff);border-radius:6px"></div></div>`;
+        recContainer.appendChild(card);
+      }
+    }
+
+    function renderResults(data){
+      recContainer.innerHTML = '';
+      if (!data.recommendations || data.recommendations.length===0){
+        recContainer.innerHTML = `<div style="padding:18px;border-radius:10px;border:1px dashed rgba(11,37,69,0.03);background:linear-gradient(0deg,#fff,#fbfdff);"><div class="meta">No recommendations returned</div><div style="margin-top:8px;color:var(--muted)">Try another customer or type.</div></div>`;
+        return;
+      }
+
+      const explMap = {};
+      if (Array.isArray(data.explanations)){
+        data.explanations.forEach(x=>{explMap[x.product]=x.explanation});
+      }
+
+      data.recommendations.forEach((r,idx)=>{
+        const card = el('div','rec-card','');
+        card.innerHTML = `<div class="rec-index">${idx+1}</div>`;
+        const body = el('div','rec-body','');
+        const title = el('div','rec-title', r.Description || 'Untitled');
+        const sub = el('div','rec-sub', `Product ID: ${r.Product_id || '-'} <span class="score">Score: ${ (r.score||0).toFixed ? (r.score||0).toFixed(3) : (r.score||0) }</span>`);
+        body.appendChild(title);
+        body.appendChild(sub);
+
+        const actions = el('div','rec-actions','');
+        const addBtn = el('button','btn-small','Add');
+        const viewBtn = el('button','btn-small','View');
+        actions.appendChild(addBtn); actions.appendChild(viewBtn);
+        body.appendChild(actions);
+
+        const explText = explMap[r.Description] || '';
+        if (showExplain.checked){
+          const expl = el('div','explain',`<strong style="display:block;margin-bottom:8px">${r.Description}</strong><div>${explText || '<span style="color:var(--muted)">No explanation available</span>'}</div>`);
+          expl.style.display='none';
+          body.appendChild(expl);
+          viewBtn.addEventListener('click', ()=>{ expl.style.display = (expl.style.display==='none' ? 'block' : 'none'); viewBtn.innerText = (expl.style.display==='none' ? 'View' : 'Hide')});
+        } else {
+          viewBtn.style.display='none';
+        }
+
+        card.appendChild(body);
+        recContainer.appendChild(card);
+      });
+    }
+
+    function renderHistory(history, country, cid){
+      historyList.innerHTML = '';
+      if (!history || history.length===0){
+        historyList.innerHTML = `<div class="hist-row"><div class="hist-name" style="color:var(--muted)">No history yet</div><div class="qty"><div class="label">Quantity</div><div class="num">-</div></div></div>`;
+      } else {
+        history.forEach(item=>{
+          const row = el('div','hist-row','');
+          const left = el('div','hist-name', `<span style="font-weight:600">${item.Description}</span>`);
+          const q = el('div','qty', `<div class="label">Quantity</div><div class="num">${item.Quantity}</div>`);
+          row.appendChild(left); row.appendChild(q);
+          historyList.appendChild(row);
+        });
+      }
+      customerMeta.innerText = cid ? `Customer ${cid}` : 'Enter customer ID to begin';
+      customerTitle.innerText = cid ? `Customer ${cid} — Purchase History` : 'Purchase History';
+      customerCountry.innerText = country ? `Country: ${country}` : '';
+    }
+
+    function showError(msg){
+      const t = el('div','','');
+      t.style.padding='12px'; t.style.background='#fff2f2'; t.style.border='1px solid #ffd6d6'; t.style.borderRadius='10px'; t.style.marginBottom='12px'; t.style.color='#8b1b1b';
+      t.innerText = msg; recContainer.prepend(t);
+      setTimeout(()=>t.remove(),6000);
+    }
+
+    generateBtn.addEventListener('click', async ()=>{
+      const cid = document.getElementById('customer_id').value.trim();
+      const rec_type = document.getElementById('rec_type').value;
+      const doExplain = showExplain.checked;
+      if (!cid){ showError('Please enter a valid Customer ID'); return; }
+
+      generateBtn.disabled = true; generateBtn.innerText = 'Generating...';
+      showLoading();
+
+      const payload = { customer_id: cid, rec_type: rec_type, n: 10, explain: doExplain };
+      try {
+        const res = await fetch('/api/recommend',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+        const data = await res.json();
+        if (!res.ok){ showError(data.error || 'Failed to fetch recommendations'); recContainer.innerHTML=''; generateBtn.disabled=false; generateBtn.innerText='Generate'; return; }
+        renderHistory(data.purchase_history||[], data.country||'', data.customer_id||cid);
+        renderResults(data);
+      } catch (err) {
+        console.error(err); showError('Network error — check server or connection'); recContainer.innerHTML='';
+      } finally {
+        generateBtn.disabled = false; generateBtn.innerText = 'Generate';
+      }
+    });
+
+    clearBtn.addEventListener('click', ()=>{
+      document.getElementById('customer_id').value='';
+      recContainer.innerHTML = `<div style="padding:18px;border-radius:10px;border:1px dashed rgba(11,37,69,0.03);background:linear-gradient(0deg,#fff,#fbfdff);"><div class="meta">No recommendations yet</div><div style="margin-top:10px;color:var(--muted)">Type a Customer ID and click Generate to see personalized suggestions.</div></div>`;
+      historyList.innerHTML = `<div class="hist-row"><div class="hist-name" style="color:var(--muted)">No history yet</div><div class="qty"><div class="label">Quantity</div><div class="num">-</div></div></div>`;
+      customerCountry.innerText=''; customerMeta.innerText='Enter customer ID to begin';
+    });
+
+    // init state
+    (function(){ recContainer.innerHTML = `<div style="padding:18px;border-radius:10px;border:1px dashed rgba(11,37,69,0.03);background:linear-gradient(0deg,#fff,#fbfdff);"><div class="meta">No recommendations yet</div><div style="margin-top:10px;color:var(--muted)">Type a Customer ID and click Generate to see personalized suggestions.</div></div>`; })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+# Core scientific stack
+pandas==2.2.2
+numpy==1.26.4
+scikit-learn==1.5.2
+scipy==1.13.1
+
+# Visualization (for EDA / optional)
+matplotlib==3.9.2
+seaborn==0.13.2
+
+# Association rule mining
+mlxtend==0.23.1
+efficient-apriori==2.0.1
+
+# Web framework (backend)
+Flask==3.0.3
+Werkzeug==3.0.3
+itsdangerous==2.2.0
+Jinja2==3.1.4
+
+# Environment and configuration management
+python-dotenv==1.0.1
+
+# API requests and progress bars
+requests==2.32.3
+tqdm==4.66.5
+
+# Notebook and Jupyter support
+ipykernel==6.29.5
+jupyter==1.1.1
+
+# For JSON handling / serialization (standard but pinned)
+orjson==3.10.7
+
+# Optional utilities used in notebook
+ace-tools==0.1.0
+
+# For model persistence and compression (used implicitly)
+joblib==1.4.2
+
+# Optional (for future semantic similarity or LLM embeddings)
+sentence-transformers==3.1.0
+
+# (optional) for CORS support in Flask if needed
+Flask-Cors==4.0.1
