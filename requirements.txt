@@ -38,8 +38,6 @@ ace-tools
 # For model persistence and compression (used implicitly)
 joblib
 
-# Optional (for future semantic similarity or LLM embeddings)
-sentence-transformers
 
 # (optional) for CORS support in Flask if needed
 Flask-Cors
