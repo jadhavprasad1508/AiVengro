@@ -2,7 +2,6 @@
 pandas
 numpy
 scikit-learn
-scipy
 
 # Visualization (for EDA / optional)
 matplotlib
@@ -15,7 +14,6 @@ efficient-apriori
 # Web framework (backend)
 Flask
 Werkzeug
-itsdangerous
 Jinja2
 
 # Environment and configuration management
@@ -23,17 +21,9 @@ python-dotenv
 
 # API requests and progress bars
 requests
-tqdm
-
-# Notebook and Jupyter support
-ipykernel
-jupyter
 
 # For JSON handling / serialization (standard but pinned)
 orjson
-
-# Optional utilities used in notebook
-ace-tools
 
 # For model persistence and compression (used implicitly)
 joblib
